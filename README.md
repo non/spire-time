@@ -6,11 +6,9 @@ work with date and time objects.
 Currently the library focuses on compatibility with
 [Joda Time](http://www.joda.org/joda-time/).
 
-This README will eventually have more information.
+Spire-Time is provided to you as free software under the MIT license.
 
-Spire-time is provided to you as free software under the MIT license.
-
-### Example
+### Examples
 
 Here are some basic examples of using this library with Spire:
 
