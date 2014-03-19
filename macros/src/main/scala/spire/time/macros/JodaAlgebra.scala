@@ -5,17 +5,6 @@ import scala.reflect.macros.Context
 
 import spire.algebra.{AbGroup, Eq, Module, Order, Rng}
 
-object JodaMacros {
-  def orderImpl[A: c.WeakTypeTag](c: Context): c.Expr[Order[A]] =
-    JodaAlgebra[c.type](c).Order[A]()
-
-  def abGroupImpl[A: c.WeakTypeTag](c: Context)(z: c.Expr[A]): c.Expr[AbGroup[A]] =
-    JodaAlgebra[c.type](c).AbGroup[A](z)
-
-  def moduleImpl[A: c.WeakTypeTag](c: Context)(z: c.Expr[A]): c.Expr[Module[A, Int]] =
-    JodaAlgebra[c.type](c).Module[A](z)
-}
-
 case class JodaAlgebra[C <: Context](c: C) extends AutoOps { ops =>
 
   import c.universe._
@@ -35,12 +24,8 @@ case class JodaAlgebra[C <: Context](c: C) extends AutoOps { ops =>
   def timesr[A: c.WeakTypeTag] = 
     binopSearch[A]("multipliedBy" :: Nil) getOrElse failedSearch("multipliedBy", ":*")
 
-  // def quot[A: c.WeakTypeTag] =
-  //   binopSearch[A]("quot" :: "divide" :: "div" :: Nil) getOrElse failedSearch("quot", "/~")
-  // def mod[A: c.WeakTypeTag](stub: => c.Expr[A]) =
-  //   binopSearch("mod" :: "remainder" :: Nil) getOrElse stub
-
   def equals = binop[Boolean]("equals")
+
   def compare = binop[Int]("compareTo")
 
   def Eq[A: c.WeakTypeTag](): c.Expr[Eq[A]] = reify {
@@ -97,9 +82,6 @@ abstract class AutoOps {
   def unopSearch[A: c.WeakTypeTag](names: List[String], x: String = "x"): Option[c.Expr[A]] =
     names find { name => hasMethod0[A, A](name) } map (unop[A](_, x))
 
-  def hbinopSearch[A: c.WeakTypeTag, B: c.WeakTypeTag](names: List[String], x: String = "x", y: String = "y"): Option[c.Expr[A]] =
-    names find { name => hasMethod1[A, B, A](name) } map (binop[A](_, x, y))
-
   def hasMethod0[A: c.WeakTypeTag, B: c.WeakTypeTag](name: String): Boolean = {
     val tpeA = c.weakTypeTag[A].tpe
     val tpeB = c.weakTypeTag[B].tpe
@@ -111,6 +93,7 @@ abstract class AutoOps {
     }
   }
 
+  // HACK: type-checking removed for now because Joda's types are somewhat weird.
   def hasMethod1[A: c.WeakTypeTag, B: c.WeakTypeTag, C: c.WeakTypeTag](name: String): Boolean = {
     val tpeA = c.weakTypeTag[A].tpe
     val tpeB = c.weakTypeTag[B].tpe

@@ -1,8 +1,7 @@
-package spire.time.std
+package spire.time.joda
 
 import org.joda.time.{DateTime, Days, Duration, Hours, Instant, LocalDate, LocalTime, Minutes, Months, Seconds, Weeks, Years}
 import spire.algebra.{AbGroup, Field, InnerProductSpace, MetricSpace, Module, Order, Rng}
-import spire.time.macros.Auto
 
 package object datetime
     extends DateTimeInstances

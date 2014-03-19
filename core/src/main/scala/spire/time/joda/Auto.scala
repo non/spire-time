@@ -1,4 +1,6 @@
-package spire.time.macros
+package spire.time.joda
+
+import spire.time.macros.JodaMacros
 
 import language.experimental.macros
 
