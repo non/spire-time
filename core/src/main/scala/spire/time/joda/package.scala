@@ -66,7 +66,7 @@ trait DaysInstances {
   implicit val daysModuleInt = Auto.module[Days](Days.ZERO)
 }
 
-trait DurationInstances {
+trait DurationInstances extends LowPriorityDurationInstances {
   implicit val durationOrder = Auto.order[Duration]
   implicit val durationAbGroup = Auto.abGroup[Duration](Duration.ZERO)
 
@@ -79,7 +79,9 @@ trait DurationInstances {
     override def minus(v: Duration, w: Duration): Duration = v minus w
     def timesl(r: Long, v: Duration): Duration = new Duration(v.getMillis * r)
   }
+}
 
+trait LowPriorityDurationInstances {
   implicit val durationInnerProductSpaceDouble = new InnerProductSpace[Duration, Double] {
     implicit val scalar: Field[Double] = Field[Double]
 
