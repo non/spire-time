@@ -3,7 +3,7 @@ package spire.time.macros
 import language.experimental.macros
 import scala.reflect.macros.Context
 
-import spire.algebra.{AbGroup, Eq, Module, Order, Rng}
+import spire.algebra.{AdditiveAbGroup, AbGroup, Eq, Module, Order, Rng}
 
 case class JodaAlgebra[C <: Context](c: C) extends AutoOps { ops =>
 
@@ -14,10 +14,17 @@ case class JodaAlgebra[C <: Context](c: C) extends AutoOps { ops =>
   def minus[A: c.WeakTypeTag] = 
     binopSearch[A]("minus" :: Nil) getOrElse failedSearch("minus", "-")
 
-  def negate[A: c.WeakTypeTag] = 
+  def inverse[A: c.WeakTypeTag] = 
     unopSearch[A]("negated" :: Nil) getOrElse {
       c.Expr[A](Apply(
         Select(Ident(newTermName("id")), newTermName("minus")),
+        List(Ident(newTermName("x")))))
+    }
+
+  def negate[A: c.WeakTypeTag] = 
+    unopSearch[A]("negated" :: Nil) getOrElse {
+      c.Expr[A](Apply(
+        Select(Ident(newTermName("zero")), newTermName("minus")),
         List(Ident(newTermName("x")))))
     }
 
@@ -41,12 +48,21 @@ case class JodaAlgebra[C <: Context](c: C) extends AutoOps { ops =>
     }
   }
 
-  def AbGroup[A: c.WeakTypeTag](z: c.Expr[A]): c.Expr[AbGroup[A]] = reify {
-    new AbGroup[A] {
-      def id: A = z.splice
-      def op(x: A, y: A): A = ops.plus.splice
-      def inverse(x: A): A = ops.negate.splice
-      override def opInverse(x: A, y: A): A = ops.minus.splice
+  // def AbGroup[A: c.WeakTypeTag](z: c.Expr[A]): c.Expr[AbGroup[A]] = reify {
+  //   new AbGroup[A] {
+  //     def id: A = z.splice
+  //     def op(x: A, y: A): A = ops.plus.splice
+  //     def inverse(x: A): A = ops.negate.splice
+  //     override def opInverse(x: A, y: A): A = ops.minus.splice
+  //   }
+  // }
+
+  def AdditiveAbGroup[A: c.WeakTypeTag](z: c.Expr[A]): c.Expr[AdditiveAbGroup[A]] = reify {
+    new AdditiveAbGroup[A] {
+      def zero: A = z.splice
+      def negate(x: A): A = ops.negate.splice
+      def plus(x: A, y: A): A = ops.plus.splice
+      override def minus(x: A, y: A): A = ops.minus.splice
     }
   }
 

@@ -1,7 +1,7 @@
 package spire.time.joda
 
-import org.joda.time.{DateTime, Days, Duration, Hours, Instant, LocalDate, LocalTime, Minutes, Months, Seconds, Weeks, Years}
-import spire.algebra.{AbGroup, Field, InnerProductSpace, MetricSpace, Module, Order, Rng}
+import org.joda.time._
+import spire.algebra._
 
 package object datetime
     extends DateTimeInstances
@@ -54,21 +54,29 @@ package object any
 trait DateTimeInstances {
   implicit val dateTimeOrder = Auto.order[DateTime]
 
-  implicit val dateTimeMetricSpace = new MetricSpace[DateTime, Duration] {
-    def distance(t1: DateTime, t2: DateTime): Duration =
-      new Duration(t1, t2)
-  }
+  implicit val dateTimeMetricSpace =
+    new MetricSpace[DateTime, Duration] {
+      def distance(t1: DateTime, t2: DateTime): Duration = new Duration(t1, t2)
+    }
+
+  implicit val dateTimeTorsor =
+    new AdditiveTorsor[DateTime, Duration] {
+      def scalar: AdditiveAbGroup[Duration] = duration.durationAbGroup
+      def gplusl(d: Duration, t: DateTime): DateTime = t.plus(d)
+      def gplusr(t: DateTime, d: Duration): DateTime = t.plus(d)
+      def pminus(t1: DateTime, t2: DateTime): Duration = new Duration(t1, t2)
+    }
 }
 
 trait DaysInstances {
   implicit val daysOrder = Auto.order[Days]
-  implicit val daysAbGroup = Auto.abGroup[Days](Days.ZERO)
+  implicit val daysAbGroup = Auto.additiveAbGroup[Days](Days.ZERO)
   implicit val daysModuleInt = Auto.module[Days](Days.ZERO)
 }
 
 trait DurationInstances extends LowPriorityDurationInstances {
   implicit val durationOrder = Auto.order[Duration]
-  implicit val durationAbGroup = Auto.abGroup[Duration](Duration.ZERO)
+  implicit val durationAbGroup = Auto.additiveAbGroup[Duration](Duration.ZERO)
 
   implicit val durationModuleLong = new Module[Duration, Long] {
     implicit val scalar: Rng[Long] = Rng[Long]
@@ -97,7 +105,7 @@ trait LowPriorityDurationInstances {
 
 trait HoursInstances {
   implicit val hoursOrder = Auto.order[Hours]
-  implicit val hoursAbGroup = Auto.abGroup[Hours](Hours.ZERO)
+  implicit val hoursAbGroup = Auto.additiveAbGroup[Hours](Hours.ZERO)
   implicit val hoursModuleInt = Auto.module[Hours](Hours.ZERO)
 }
 
@@ -115,30 +123,30 @@ trait LocalTimeInstances {
 
 trait MinutesInstances {
   implicit val minutesOrder = Auto.order[Minutes]
-  implicit val minutesAbGroup = Auto.abGroup[Minutes](Minutes.ZERO)
+  implicit val minutesAbGroup = Auto.additiveAbGroup[Minutes](Minutes.ZERO)
   implicit val minutesModuleInt = Auto.module[Minutes](Minutes.ZERO)
 }
 
 trait MonthsInstances {
   implicit val monthsOrder = Auto.order[Months]
-  implicit val monthsAbGroup = Auto.abGroup[Months](Months.ZERO)
+  implicit val monthsAbGroup = Auto.additiveAbGroup[Months](Months.ZERO)
   implicit val monthsModuleInt = Auto.module[Months](Months.ZERO)
 }
 
 trait SecondsInstances {
   implicit val secondsOrder = Auto.order[Seconds]
-  implicit val secondsAbGroup = Auto.abGroup[Seconds](Seconds.ZERO)
+  implicit val secondsAbGroup = Auto.additiveAbGroup[Seconds](Seconds.ZERO)
   implicit val secondsModuleInt = Auto.module[Seconds](Seconds.ZERO)
 }
 
 trait WeeksInstances {
   implicit val weeksOrder = Auto.order[Weeks]
-  implicit val weeksAbGroup = Auto.abGroup[Weeks](Weeks.ZERO)
+  implicit val weeksAbGroup = Auto.additiveAbGroup[Weeks](Weeks.ZERO)
   implicit val weeksModuleInt = Auto.module[Weeks](Weeks.ZERO)
 }
 
 trait YearsInstances {
   implicit val yearsOrder = Auto.order[Years]
-  implicit val yearsAbGroup = Auto.abGroup[Years](Years.ZERO)
+  implicit val yearsAbGroup = Auto.additiveAbGroup[Years](Years.ZERO)
   implicit val yearsModuleInt = Auto.module[Years](Years.ZERO)
 }
