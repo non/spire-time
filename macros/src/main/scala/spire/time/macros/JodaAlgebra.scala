@@ -4,6 +4,7 @@ import language.experimental.macros
 import scala.reflect.macros.Context
 
 import spire.algebra.{AbGroup, Eq, Module, Order, Rng}
+import spire.std.any._
 
 case class JodaAlgebra[C <: Context](c: C) extends AutoOps { ops =>
 

@@ -1,7 +1,9 @@
 package spire.time.joda
 
-import org.joda.time.{DateTime, Days, Duration, Hours, Instant, LocalDate, LocalTime, Minutes, Months, Seconds, Weeks, Years}
-import spire.algebra.{AbGroup, Field, InnerProductSpace, MetricSpace, Module, Order, Rng}
+import org.joda.time._
+import spire.algebra._
+import spire.math.Rational
+import spire.std.any._
 
 package object datetime
     extends DateTimeInstances
@@ -52,18 +54,30 @@ package object any
     with YearsInstances
 
 trait DateTimeInstances {
-  implicit val dateTimeOrder = Auto.order[DateTime]
+  implicit val dateTimeOrder =
+    Auto.order[DateTime]
 
-  implicit val dateTimeMetricSpace = new MetricSpace[DateTime, Duration] {
-    def distance(t1: DateTime, t2: DateTime): Duration =
-      new Duration(t1, t2)
-  }
+  implicit val dateTimeMetricSpace =
+    new MetricSpace[DateTime, Duration] {
+      def distance(t1: DateTime, t2: DateTime): Duration =
+        new Duration(t1, t2)
+    }
+
+  implicit val dateTimeTorsor =
+    new Torsor[DateTime, Duration] {
+      def actl(d: Duration, dt: DateTime): DateTime =
+        dt.plus(d)
+      def actr(dt: DateTime, d: Duration): DateTime =
+        dt.plus(d)
+      def diff(dt1: DateTime, dt2: DateTime): Duration =
+        new Period(dt1, dt2).toStandardDuration
+    }
 }
 
 trait DaysInstances {
   implicit val daysOrder = Auto.order[Days]
   implicit val daysAbGroup = Auto.abGroup[Days](Days.ZERO)
-  implicit val daysModuleInt = Auto.module[Days](Days.ZERO)
+  implicit lazy val daysModuleInt = Auto.module[Days](Days.ZERO)
 }
 
 trait DurationInstances extends LowPriorityDurationInstances {
@@ -82,16 +96,17 @@ trait DurationInstances extends LowPriorityDurationInstances {
 }
 
 trait LowPriorityDurationInstances {
-  implicit val durationInnerProductSpaceDouble = new InnerProductSpace[Duration, Double] {
-    implicit val scalar: Field[Double] = Field[Double]
+  val field = Field[Rational]
+  implicit val durationInnerProductSpaceRational = new InnerProductSpace[Duration, Rational] {
+    implicit val scalar: Field[Rational] = field
 
     def zero: Duration = Duration.ZERO
     def negate(v: Duration): Duration = new Duration(-v.getMillis)
     def plus(v: Duration, w: Duration): Duration = v plus w
     override def minus(v: Duration, w: Duration): Duration = v minus w
-    def timesl(r: Double, v: Duration): Duration = new Duration(v.getMillis * r.toLong)
-    override def divr(v: Duration, r: Double): Duration = new Duration((v.getMillis / r).toLong)
-    def dot(v: Duration, w: Duration): Double = v.getMillis.toDouble * w.getMillis.toDouble
+    def timesl(r: Rational, v: Duration): Duration = new Duration(v.getMillis * r.toLong)
+    override def divr(v: Duration, r: Rational): Duration = new Duration((Rational(v.getMillis) / r).toLong)
+    def dot(v: Duration, w: Duration): Rational = Rational(v.getMillis) * Rational(w.getMillis)
   }
 }
 
